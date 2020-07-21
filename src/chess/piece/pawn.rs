@@ -19,7 +19,5 @@ pub fn get_threatened_by_pawn(ctx:PieceContext) -> Vec<PiecePosition>
 
 pub fn get_possible_moves_by_pawn(ctx:PieceContext) -> Vec<PiecePosition>
 {
-	let mut possibles:Vec<PiecePosition> = Vec::new();
-	let row_dif = if ctx.piece.is_white {-1}else{1};
-
+	vec![]
 }
