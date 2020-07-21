@@ -1,69 +1,46 @@
 use crate::chess::piece::{ChessPiece, PieceType};
+use crate::chess::board_creator;
+use crate::chess::error::ChessError;
+use crate::chess::piece::moves::{PlayerMove, PiecePosition};
 
 pub type ChessBoard = Vec<Vec<ChessPiece>>;
 
 #[derive(Debug)]
 pub struct ChessGame
 {
+    pub is_whites_turn:bool,
     pub board: ChessBoard
 }
 
 impl ChessGame
 {
-    fn construct_base_row(is_white: bool) -> Vec<ChessPiece>
+    pub fn get_piece_at(&self,pos:PiecePosition) -> &ChessPiece
     {
-        let piece_order = vec![PieceType::Rook, PieceType::Bishop, PieceType::Knight, PieceType::King, PieceType::Queen,PieceType::Knight, PieceType::Bishop, PieceType::Rook];
-        let mut row: Vec<ChessPiece> = vec![];
-        for ii in 0..8
-        {
-            let target_type = piece_order[if is_white { 7 - ii } else { ii } ].clone();
-            row.push(ChessPiece {
-                is_white,
-                piece_type: target_type,
-            });
-        }
-
-        row
+        &self.board[pos.row as usize][pos.col as usize]
     }
 
-    fn construct_starter_board() -> ChessBoard
+    pub fn is_position_occupied(&self,pos:PiecePosition) -> bool
     {
-        let mut board: ChessBoard = vec![];
-        for row in 0..8
-        {
-            if row == 0 || row == 7
-            {
-                board.push(Self::construct_base_row(row == 7));
-            } else if row == 1 || row == 6
-            {
-                board.push((0..8).map(|_ii| ChessPiece{is_white:row == 6,piece_type:PieceType::Pawn}).collect());
-            }
-            else {
-                board.push((0..8).map(|_ii| ChessPiece { is_white: true, piece_type: PieceType::Empty }).collect());
-            }
-        }
-
-        board
+        self.get_piece_at(pos).piece_type != PieceType::Empty
     }
 
     pub fn new() -> Self
     {
         Self
         {
-            board: Self::construct_starter_board()
+            is_whites_turn:true,
+            board: board_creator::construct_starter_board()
         }
     }
 
-    pub fn display_on_console(&self)
+    pub fn make_move(&mut self,player_move:PlayerMove) -> Result<(),ChessError>
     {
-        for row in 0..8
+        if player_move.owner_is_white != self.is_whites_turn
         {
-            print!("|");
-            for col in 0..8
-            {
-                print!("{}|", self.board[row][col].get_unicode_representation());
-            }
-            println!();
+            return Err(ChessError::InvalidMove);
         }
+
+        Ok(())
     }
+
 }
