@@ -53,8 +53,8 @@ impl PiecePosition
         let cols = Self::column_letters();
         let chars = notation.chars().collect::<Vec<char>>();
         let f_pos = cols.iter().position(|cc| cc.to_string() == chars[0].to_string()).ok_or(ChessError::CantParseNotation)?;
-        let s_pos:usize = chars[1].to_string().parse().unwrap();
-        PiecePosition::new_from_cord(s_pos,f_pos)
+        let s_pos:i32 = chars[1].to_string().parse().map_err(|_| ChessError::CantParseNotation)?;
+        PiecePosition::new_from_cord((s_pos-1) as usize,f_pos)
     }
 
     pub fn add(&self,row_dif:i32,col_dif:i32) -> Result<PiecePosition,ChessError>
