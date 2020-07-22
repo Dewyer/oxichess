@@ -2,7 +2,7 @@ use crate::chess::error::ChessError;
 use crate::chess::piece::ChessPiece;
 use crate::chess::game::{ChessGame, Player};
 
-#[derive(Copy, Clone,Eq, PartialEq)]
+#[derive(Copy, Clone,Eq, PartialEq,Debug)]
 pub struct PiecePosition
 {
     pub row: usize,
@@ -20,15 +20,14 @@ pub struct PlayerMove
 pub struct PieceContext<'a,'b>
 {
     pub piece:&'b ChessPiece,
-    pub game:&'a ChessGame,
-    pub piece_position:PiecePosition
+    pub game:&'a ChessGame
 }
 
 impl PiecePosition
 {
     pub fn new_from_cord(row: usize, col: usize) -> Result<Self,ChessError>
     {
-        if row < 0 || row > 8 || col < 0 || col > 8
+        if  row > 8 || col > 8
         {
             return Err(ChessError::InvalidPiecePosition);
         }

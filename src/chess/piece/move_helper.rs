@@ -1,4 +1,3 @@
-use crate::chess::piece::{PieceType, ChessPiece};
 use crate::chess::game::ChessGame;
 use crate::chess::piece::piece_position::PiecePosition;
 
