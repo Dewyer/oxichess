@@ -26,7 +26,7 @@ impl ConsoleChessGame
         }
         let piece_order = vec![PieceType::King, PieceType::Queen, PieceType::Rook, PieceType::Bishop, PieceType::Knight, PieceType::Pawn];
         let index: u32 = piece_order.iter().position(|el| std::mem::discriminant(el) == std::mem::discriminant(&piece.piece_type)).unwrap() as u32;
-        let code_point = CHESS_PIECES_BASE_UNICODE_VALUE + index + (if piece.is_white { 0 } else { 6 });
+        let code_point = CHESS_PIECES_BASE_UNICODE_VALUE + index + (if piece.owner.is_white() { 0 } else { 6 });
         std::char::from_u32(code_point).unwrap().to_string()
     }
 

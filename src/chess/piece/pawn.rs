@@ -1,23 +1,18 @@
 use crate::chess::game::ChessGame;
 use crate::chess::piece::ChessPiece;
-use crate::chess::piece::moves::{PiecePosition, PieceContext};
+use crate::chess::piece::piece_position::{PiecePosition, PieceContext};
+use crate::chess::piece::move_helper::ChessPieceMovementHelper;
 
 pub fn get_threatened_by_pawn(ctx:PieceContext) -> Vec<PiecePosition>
 {
-	let mut possibles:Vec<PiecePosition> = Vec::new();
-	let row_dif = if ctx.piece.is_white {-1}else{1};
-	for col_off in vec![1,-1]
-	{
-		if let Some(pos) = ctx.piece_position.add(row_dif,col_off)
-		{
-			possibles.push(pos);
-		}
-	}
-
-	possibles
+	let row_dif = if ctx.piece.owner.is_white() {-1} else {1};
+	let helper = ChessPieceMovementHelper::new(false,vec![(row_dif,1),(row_dif,-1)]);
+	helper.generate_positions(ctx.game,ctx.piece_position,true)
 }
 
 pub fn get_possible_moves_by_pawn(ctx:PieceContext) -> Vec<PiecePosition>
 {
-	vec![]
+	let row_dif = if ctx.piece.owner.is_white() {-1} else {1};
+	let helper = ChessPieceMovementHelper::new(false,vec![(row_dif,0)]);
+	helper.generate_positions(ctx.game,ctx.piece_position,false)
 }

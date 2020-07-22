@@ -5,7 +5,9 @@ use std::fmt::{Display, Formatter};
 pub enum ChessError
 {
     InvalidMove,
-    InvalidPiecePosition
+    NotRightPlayersMove,
+    InvalidPiecePosition,
+    PieceIsNotYours
 }
 
 impl Display for ChessError
