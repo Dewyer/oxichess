@@ -7,7 +7,8 @@ pub enum ChessError
     InvalidMove,
     NotRightPlayersMove,
     InvalidPiecePosition,
-    PieceIsNotYours
+    PieceIsNotYours,
+    CantParseNotation
 }
 
 impl Display for ChessError

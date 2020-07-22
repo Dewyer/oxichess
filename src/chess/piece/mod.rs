@@ -1,3 +1,8 @@
+pub mod king;
+pub mod queen;
+pub mod knight;
+pub mod bishop;
+pub mod rook;
 pub mod move_helper;
 pub mod pawn;
 

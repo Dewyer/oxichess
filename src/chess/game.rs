@@ -2,7 +2,7 @@ use crate::chess::piece::{ChessPiece, PieceType};
 use crate::chess::board_creator;
 use crate::chess::error::ChessError;
 use crate::chess::piece::piece_position::{PlayerMove, PiecePosition, PieceContext};
-use crate::chess::piece::pawn;
+use crate::chess::piece::*;
 
 pub type ChessBoard = Vec<Vec<ChessPiece>>;
 
@@ -71,14 +71,14 @@ pub struct ChessGame
 
 impl ChessGame
 {
-	pub fn update_piece_position(&mut self,old_pos:PiecePosition,new_pos:PiecePosition)
+	fn update_piece_position(&mut self,old_pos:PiecePosition,new_pos:PiecePosition)
 	{
 		self.board[old_pos.row][old_pos.col].update_position(new_pos);
 	}
 
 	pub fn get_piece_at(&self, pos: PiecePosition) -> &ChessPiece
 	{
-		&self.board[pos.row as usize][pos.col as usize]
+		&self.board[pos.row][pos.col]
 	}
 
 	pub fn is_position_occupied(&self, pos: PiecePosition) -> bool
@@ -99,7 +99,7 @@ impl ChessGame
 		}
 	}
 
-	pub fn is_position_threatened(&self, pos: PiecePosition, for_player: Player) -> bool
+	fn is_position_threatened(&self, pos: PiecePosition, for_player: Player) -> bool
 	{
 		for row in 0..8
 		{
@@ -107,7 +107,7 @@ impl ChessGame
 			{
 				let at_pos = PiecePosition::new_from_cord(row, col).unwrap();
 				let pp = self.get_piece_at(at_pos);
-				if pp.owner == for_player
+				if pp.owner != for_player
 				{
 					let threats = self.get_threatened_by_piece(pp);
 					if threats.iter().any(|el| el == &pos)
@@ -121,7 +121,7 @@ impl ChessGame
 		false
 	}
 
-	pub fn would_position_be_threatened(&self, pos: PiecePosition, player_move: PlayerMove) -> bool
+	fn would_position_be_threatened(&self, pos: PiecePosition, player_move: PlayerMove) -> bool
 	{
 		let pseudo_game = self.make_pseudo_board(player_move);
 		pseudo_game.is_position_threatened(pos, player_move.owner)
@@ -142,9 +142,11 @@ impl ChessGame
 		self.update_piece_position(player_move.from,player_move.to);
 	}
 
-	pub fn validate_move(&self, player_move: &PlayerMove, moving_piece: &ChessPiece) -> Result<(), ChessError>
+	fn validate_move(&self, player_move: &PlayerMove, moving_piece: &ChessPiece) -> Result<(), ChessError>
 	{
-		if self.on_turn == player_move.owner && &self.state == &GameState::Playing
+		let playing = &self.state == &GameState::Playing;
+		let owner = self.on_turn == player_move.owner;
+		if !(owner && playing)
 		{
 			return Err(ChessError::NotRightPlayersMove);
 		}
@@ -180,6 +182,8 @@ impl ChessGame
 		self.execute_move(player_move);
 		self.check_state = self.get_new_check_state();
 
+		self.on_turn = if self.on_turn.is_white() {Player::Black} else {Player::White};
+
 		Ok(())
 	}
 
@@ -190,6 +194,11 @@ impl ChessGame
 		match &piece.piece_type
 		{
 			PieceType::Pawn => pawn::get_threatened_by_pawn(ctx),
+			PieceType::Rook => rook::get_threatened_by_rook(ctx),
+			PieceType::Bishop => bishop::get_threatened_by_bishop(ctx),
+			PieceType::Knight => knight::get_threatened_by_knight(ctx),
+			PieceType::King => king::get_threatened_by_king(ctx),
+			PieceType::Queen => queen::get_threatened_by_queen(ctx),
 			_ => vec![]
 		}
 	}
@@ -201,6 +210,11 @@ impl ChessGame
 		match &piece.piece_type
 		{
 			PieceType::Pawn => pawn::get_possible_moves_by_pawn(ctx),
+			PieceType::Rook => rook::get_possible_moves_by_rook(ctx),
+			PieceType::Bishop => bishop::get_possible_moves_by_bishop(ctx),
+			PieceType::Knight => knight::get_possible_moves_by_knight(ctx),
+			PieceType::King => king::get_possible_moves_by_king(ctx),
+			PieceType::Queen => queen::get_possible_moves_by_queen(ctx),
 			_ => vec![]
 		}
 	}
@@ -237,13 +251,13 @@ impl ChessGame
 		}
 	}
 
-	fn get_moves_for_piece(&self, piece: &ChessPiece) -> Vec<PiecePosition>
+	pub fn get_moves_for_piece(&self, piece: &ChessPiece) -> Vec<PiecePosition>
 	{
 		let possible_moves = self.get_possible_moves_for_piece(piece);
 		let mut filtered_moves: Vec<PiecePosition> = Vec::new();
-		// TODO: Can't move into check, when in check, this should resolve it
 		for p_move in possible_moves
 		{
+			println!("{:?} pos move.",p_move);
 			let pseudo_move = PlayerMove {
 				owner: piece.owner,
 				from: piece.position,
@@ -253,6 +267,10 @@ impl ChessGame
 			if !self.would_make_self_check(pseudo_move)
 			{
 				filtered_moves.push(p_move);
+			}
+			else
+			{
+				println!("failed check check {:?}",pseudo_move);
 			}
 		}
 

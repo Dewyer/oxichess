@@ -30,7 +30,7 @@ impl ChessPieceMovementHelper
 					let got_free = !game.is_position_occupied(got_position);
 					if got_free || (!got_free && include_collision_position)
 					{
-						results.push(at_position);
+						results.push(got_position);
 					}
 					if !got_free || !self.repeating
 					{

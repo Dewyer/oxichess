@@ -9,7 +9,7 @@ pub struct PiecePosition
     pub col: usize,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone,Debug)]
 pub struct PlayerMove
 {
     pub owner:Player,
@@ -27,7 +27,7 @@ impl PiecePosition
 {
     pub fn new_from_cord(row: usize, col: usize) -> Result<Self,ChessError>
     {
-        if  row > 8 || col > 8
+        if  row > 7 || col > 7
         {
             return Err(ChessError::InvalidPiecePosition);
         }
@@ -39,17 +39,40 @@ impl PiecePosition
         })
     }
 
+    fn column_letters() -> Vec<&'static str>
+    {
+        vec!["A","B","C","D","E","F","G","H"]
+    }
+
+    pub fn new_from_notation(notation:String) -> Result<Self,ChessError>
+    {
+        if notation.len() != 2
+        {
+            return Err(ChessError::CantParseNotation);
+        }
+        let cols = Self::column_letters();
+        let chars = notation.chars().collect::<Vec<char>>();
+        let f_pos = cols.iter().position(|cc| cc.to_string() == chars[0].to_string()).ok_or(ChessError::CantParseNotation)?;
+        let s_pos:usize = chars[1].to_string().parse().unwrap();
+        PiecePosition::new_from_cord(s_pos,f_pos)
+    }
+
     pub fn add(&self,row_dif:i32,col_dif:i32) -> Result<PiecePosition,ChessError>
     {
         let new_row = self.row as i32 + row_dif;
-        let new_col = self.col as i32 +col_dif;
-        if new_row < 0 ||new_col < 0
+        let new_col = self.col as i32 + col_dif;
+        //println!("{} {} trying from add",new_row,new_col);
+
+        if new_row < 0 || new_col < 0
         {
             return Err(ChessError::InvalidPiecePosition)
         }
+        Self::new_from_cord( new_row as usize,new_col as usize )
+    }
 
-        let new_piece = Self::new_from_cord( new_row as usize,new_col as usize )?;
-        Ok(new_piece)
+    pub fn get_notation(&self) -> String
+    {
+        format!("{}{}",Self::column_letters()[self.col],self.row)
     }
 }
 
